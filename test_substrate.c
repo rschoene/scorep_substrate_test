@@ -131,7 +131,6 @@ uint32_t request_index = 0
  *  */
 #define CHECK_TIMESTAMP \
   do{ \
-    fprintf(stderr,"%d: %llu <= %llu?\n",index,locations[index].last_timestamp,timestamp); \
     assert( locations[index].last_timestamp <= timestamp ); \
     locations[index].last_timestamp = timestamp; \
   } \
@@ -181,7 +180,7 @@ static void test_substrate_EnableRecording(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_REGION_HANDLE,regionHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_REGION,regionHandle);
   /* assert disabled */
   assert(!locations[index].enabled);
   /* set enabled */
@@ -197,7 +196,7 @@ static void test_substrate_DisableRecording(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_REGION_HANDLE,regionHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_REGION,regionHandle);
   /* assert enabled */
   assert(locations[index].enabled);
   /* set disabled */
@@ -213,7 +212,7 @@ static void test_substrate_OnTracingBufferFlushBegin(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_REGION_HANDLE,regionHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_REGION,regionHandle);
   /* assert disabled */
   assert(!locations[index].flush_enabled);
   /* set enabled */
@@ -229,7 +228,7 @@ static void test_substrate_OnTracingBufferFlushEnd(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_REGION_HANDLE,regionHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_REGION,regionHandle);
   /* assert enabled */
   assert(locations[index].flush_enabled);
   /* set disabled */
@@ -245,7 +244,7 @@ static void test_substrate_EnterRegion(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_REGION_HANDLE,regionHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_REGION,regionHandle);
   /* assert stack size not exceeded */
   assert(locations[index].stack_depth < ( MAX_STACK - 1 ) );
   /* add region to stack */
@@ -263,7 +262,7 @@ static void test_substrate_ExitRegion(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_REGION_HANDLE,regionHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_REGION,regionHandle);
   /* assert exited region = region on top of stack */
   assert(locations[index].stack[locations[index].stack_depth-1] == regionHandle );
   /* decrease stack size */
@@ -279,7 +278,7 @@ static void test_substrate_EnterRewindRegion(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_REGION_HANDLE,regionHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_REGION,regionHandle);
   /* increase number of rewind regions */
   locations[index].nr_rewind++;
 }
@@ -293,7 +292,7 @@ void test_substrate_ExitRewindRegion(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_REGION_HANDLE,regionHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_REGION,regionHandle);
   /* assert there are rewind regions */
   assert(locations[index].nr_rewind!=0);
   /* decrease number of rewind regions (at finalize they should be 0) */
@@ -310,7 +309,7 @@ static void test_substrate_MpiSend(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_INTERIM_COMMUNICATOR_HANDLE,communicatorHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_INTERIM_COMMUNICATOR,communicatorHandle);
 }
 static void test_substrate_MpiRecv(
     struct SCOREP_Location*          location,
@@ -323,7 +322,7 @@ static void test_substrate_MpiRecv(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_INTERIM_COMMUNICATOR_HANDLE,communicatorHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_INTERIM_COMMUNICATOR,communicatorHandle);
 }
 
 static void test_substrate_MpiCollectiveBegin(
@@ -347,7 +346,7 @@ static void test_substrate_MpiCollectiveEnd(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_INTERIM_COMMUNICATOR_HANDLE,communicatorHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_INTERIM_COMMUNICATOR,communicatorHandle);
 }
 
 static void test_substrate_MpiIsendComplete(
@@ -411,7 +410,7 @@ static void test_substrate_MpiIsend(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_INTERIM_COMMUNICATOR_HANDLE,communicatorHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_INTERIM_COMMUNICATOR,communicatorHandle);
   /* register request */
   locations[index].requests[locations[index].nr_requests++]=requestId;
 }
@@ -428,7 +427,7 @@ static void test_substrate_MpiIrecv(
   VARIABLES;
   CHECK_LOCATION(location);
   CHECK_TIMESTAMP;
-  CHECK_HANDLE_DEFINED(SCOREP_INTERIM_COMMUNICATOR_HANDLE,communicatorHandle);
+  CHECK_HANDLE_DEFINED(SCOREP_HANDLE_TYPE_INTERIM_COMMUNICATOR,communicatorHandle);
   CHECK_REQUEST;
   /* finish request */
   locations[index].requests[request_index] = -1;
