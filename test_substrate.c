@@ -42,7 +42,7 @@
 struct location_info
 {
   /** handle */
-  struct SCOREP_Location* location;
+  const struct SCOREP_Location* location;
 
   /** current stack */
   /** see also MAX_STACK */
@@ -443,7 +443,7 @@ static int test_early_init( void )
   return 0;
 }
 
-static void test_late_init( void )
+static void test_late_init( size_t pluginId )
 {
 }
 
@@ -453,7 +453,7 @@ static void test_finalize( void )
   for (index = 0; index < nr_infos; index ++)
   {
     /* location should be deleted */
-    assert(locations[index].location == SCOREP_INVALID_LOCATION);
+    assert(locations[index].location == SCOREP_MOVABLE_NULL);
     /* location should have stack size 0 */
     assert(locations[index].stack_depth == 0);
     /* location should be disabled */
@@ -473,12 +473,12 @@ static void test_finalize( void )
 }
 
 
-static void test_create_location( struct SCOREP_Location* location,
-                            struct SCOREP_Location* parentLocation )
+static void test_create_location( const struct SCOREP_Location* location,
+                                  const struct SCOREP_Location* parentLocation )
 {
   VARIABLES;
   /* check if parent is registered or root of locations */
-  if (parentLocation != SCOREP_INVALID_LOCATION)
+  if (parentLocation != SCOREP_MOVABLE_NULL)
     CHECK_LOCATION(parentLocation);
   /* register location */
   pthread_mutex_lock(&location_lock);
@@ -487,20 +487,20 @@ static void test_create_location( struct SCOREP_Location* location,
 }
 
 
-static void test_delete_location( struct SCOREP_Location* location )
+static void test_delete_location( const struct SCOREP_Location* location )
 {
   VARIABLES;
   CHECK_LOCATION(location);
 
   /* unregister location */
   pthread_mutex_lock(&location_lock);
-  locations[index].location=SCOREP_INVALID_LOCATION;
+  locations[index].location = SCOREP_MOVABLE_NULL;
   pthread_mutex_unlock(&location_lock);
 }
 
-static void test_activate_location( struct SCOREP_Location* location,
-                              struct SCOREP_Location* parentLocation,
-                              uint32_t                forkSequenceCount )
+static void test_activate_location( const struct SCOREP_Location* location,
+                                    const struct SCOREP_Location* parentLocation,
+                                    uint32_t                      forkSequenceCount )
 {
   VARIABLES;
   CHECK_LOCATION(location);
@@ -510,8 +510,8 @@ static void test_activate_location( struct SCOREP_Location* location,
   locations[index].active=1;
 }
 
-static void test_deactivate_location( struct SCOREP_Location* location,
-                                struct SCOREP_Location* parentLocation )
+static void test_deactivate_location( const struct SCOREP_Location* location,
+                                      const struct SCOREP_Location* parentLocation )
 {
   VARIABLES;
   CHECK_LOCATION(location);
@@ -520,16 +520,16 @@ static void test_deactivate_location( struct SCOREP_Location* location,
   locations[index].active=0;
 }
 
-static void test_core_task_create( struct SCOREP_Location* location,
-                             SCOREP_TaskHandle       taskHandle  )
+static void test_core_task_create( const struct SCOREP_Location* location,
+                                   SCOREP_TaskHandle             taskHandle  )
 {
   VARIABLES;
   CHECK_LOCATION(location);
   locations[index].nr_tasks++;
 }
 
-static void test_core_task_complete( struct SCOREP_Location* location,
-                               SCOREP_TaskHandle       taskHandle  )
+static void test_core_task_complete( const struct SCOREP_Location* location,
+                                     SCOREP_TaskHandle             taskHandle  )
 {
   VARIABLES;
   CHECK_LOCATION(location);
@@ -538,8 +538,8 @@ static void test_core_task_complete( struct SCOREP_Location* location,
 }
 
 
-static void test_define_handle( SCOREP_AnyHandle handle,
-                          SCOREP_HandleType type )
+static void test_define_handle( SCOREP_AnyHandle  handle,
+                                SCOREP_HandleType type )
 {
   assert(handle);
   pthread_mutex_lock(&handle_lock);
@@ -580,20 +580,20 @@ static uint32_t test_get_event_functions(
 }
 
 
-SCOREP_SUBSTRATE_PLUGIN_ENTRY(test_substrate)
+SCOREP_SUBSTRATE_PLUGIN_ENTRY(test)
 {
-  SCOREP_Substrate_Plugin_Info info;
-  memset(&info,0,sizeof(SCOREP_Substrate_Plugin_Info));
-  info.early_init=test_early_init;
-  info.late_init=test_late_init;
+  SCOREP_SubstratePluginInfo info;
+  memset(&info,0,sizeof(SCOREP_SubstratePluginInfo));
+  info.init=test_early_init;
+  info.assign_id=test_late_init;
   info.finalize=test_finalize;
   info.create_location=test_create_location;
   info.delete_location=test_delete_location;
-  info.activate_location=test_activate_location;
-  info.deactivate_location=test_deactivate_location;
+  info.activate_cpu_location=test_activate_location;
+  info.deactivate_cpu_location=test_deactivate_location;
   info.core_task_create=test_core_task_create;
   info.core_task_complete=test_core_task_complete;
-  info.define_handle=test_define_handle;
+  info.new_definition_handle=test_define_handle;
   info.get_event_functions=test_get_event_functions;
   return info;
 }
